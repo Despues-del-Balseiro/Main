@@ -12,6 +12,7 @@ body:
     attributes:
       label: Sección
       options:
+        - "Física Médica"
         - Interdisciplinaria
         - Materia blanda
         - Materia condensada

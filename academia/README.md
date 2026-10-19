@@ -4,6 +4,7 @@ Maestrías y doctorados, una carpeta por área.
 
 | Área | Incluye |
 |---|---|
+| [Física Médica](fisica-medica/) | — |
 | [Interdisciplinaria](interdisciplinaria/) | sistemas complejos y física aplicada a la biología, la ecología o la sociedad |
 | [Materia blanda](materia-blanda/) | coloides, polímeros, materia activa, biofísica, ... |
 | [Materia condensada](materia-condensada/) | materiales, magnetismo, superconductividad, bajas temperaturas, ... |

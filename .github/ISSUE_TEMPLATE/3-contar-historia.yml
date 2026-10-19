@@ -26,6 +26,7 @@ body:
     attributes:
       label: Área
       options:
+        - "Física Médica"
         - Interdisciplinaria
         - Materia blanda
         - Materia condensada
