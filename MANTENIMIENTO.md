@@ -25,7 +25,9 @@ Notas para quienes cuidan el repositorio. Conviene que haya al menos dos persona
 
 - **De formularios a archivos.** Cuando alguien envía un formulario, copiá el contenido en el archivo que corresponde usando la plantilla de ese archivo. Después cerrá el issue con un link al commit.
 - **Revisá los pull requests**, sobre todo la regla sobre personas: los comentarios tienen que ser positivos o estar en blanco. Si no lo son, pedile a quien los escribió que los saque antes de aceptar el cambio. Lo mismo con las historias que mencionan a personas.
-- **Áreas nuevas.** Cuando agregues una carpeta en `academia/`, sumala también a [academia/README.md](academia/README.md) y a las listas desplegables de `.github/ISSUE_TEMPLATE/`.
+- **Áreas nuevas.** Usá **Actions → Agregar área → Run workflow** (los pasos están en *Agregar un área nueva*, en [CONTRIBUTING.md](CONTRIBUTING.md)). Crea la carpeta y actualiza la tabla de [academia/README.md](academia/README.md), los formularios y [general/encuesta.md](general/encuesta.md). Después sumá el área a mano en la pregunta *Área* del formulario de Google.
+  - Si la acción falla al guardar los cambios con un error de permisos (403), andá a **Settings → Actions → General → Workflow permissions**, elegí **Read and write permissions** y volvé a correrla.
+  - Si te equivocaste en el nombre, alguien que use Git lo puede deshacer con `git revert` sobre el commit "Agregar área: …". Sin Git: borrá los archivos de la carpeta creada (en cada archivo, menú **⋯ → Delete file**) y sacá el área de `academia/README.md`, de los tres formularios y de `general/encuesta.md`. Después corré la acción de nuevo con el nombre correcto.
 
 ## Todos los años (por ejemplo, al empezar el ciclo lectivo)
 
