@@ -19,7 +19,7 @@ Usá esta escala en todas las preguntas de "cuándo". El **último año** es el 
 ### Sección 1 — Sobre vos
 
 1. **¿Cuándo te recibiste?** (mes y año; respuesta corta, obligatoria)
-2. **Área** (opción múltiple): Interdisciplinaria · Materia blanda · Materia condensada · Partículas · Física Médica · Otra
+2. **Área** (opción múltiple): Interdisciplinaria · Materia blanda · Materia condensada · Partículas · Física Médica · Semiconductores · Otra
 3. **¿Buscaste doctorado o maestría?** (Sí → Sección 2 / No → Sección 3)
 
 ### Sección 2 — Búsqueda de doctorado o maestría

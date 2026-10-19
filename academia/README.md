@@ -9,6 +9,7 @@ Maestrías y doctorados, una carpeta por área.
 | [Materia blanda](materia-blanda/) | coloides, polímeros, materia activa, biofísica, ... |
 | [Materia condensada](materia-condensada/) | materiales, magnetismo, superconductividad, bajas temperaturas, ... |
 | [Partículas](particulas/) | altas energías (experimental y teórica), astropartículas, ... |
+| [Semiconductores](semiconductores/) | — |
 
 Todas las carpetas tienen las mismas tres partes: `lugares.md`, `personas.md` e `historias/`.
 
