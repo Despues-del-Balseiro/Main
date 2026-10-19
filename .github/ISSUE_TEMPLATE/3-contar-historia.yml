@@ -1,0 +1,93 @@
+name: Contar tu historia
+description: Contales a los futuros egresados cómo fue tu búsqueda. Alguien del equipo la convierte en un archivo de la carpeta historias.
+title: "[Historia] "
+labels: ["nueva-historia"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Las respuestas cortas están bien. Lo honesto sirve más que lo prolijo: *qué harías distinto* suele ser lo más valioso.
+        Si mencionás investigadores o contactos con nombre, decí solo cosas positivas sobre ellos.
+  - type: input
+    id: name
+    attributes:
+      label: Nombre para mostrar
+      description: Escribí "anónimo" si preferís.
+    validations:
+      required: true
+  - type: input
+    id: year
+    attributes:
+      label: Año en que te recibiste
+    validations:
+      required: true
+  - type: dropdown
+    id: section
+    attributes:
+      label: Área
+      options:
+        - Interdisciplinaria
+        - Materia blanda
+        - Materia condensada
+        - Partículas
+        - Industria
+        - General (todas las áreas)
+        - Otra área (escribila abajo)
+    validations:
+      required: true
+  - type: input
+    id: thesis
+    attributes:
+      label: Tema de tesis (una línea)
+  - type: dropdown
+    id: looked-for
+    attributes:
+      label: ¿Qué buscaste?
+      multiple: true
+      options:
+        - Doctorado
+        - Maestría
+        - Trabajo en la academia
+        - Trabajo en la industria
+        - Otro
+  - type: textarea
+    id: goal
+    attributes:
+      label: ¿Qué estabas buscando?
+      description: Países, temas, tipo de posición. ¿Qué era lo más importante para vos?
+  - type: textarea
+    id: timeline
+    attributes:
+      label: Cronología
+      description: Las fechas relativas a tu graduación ayudan mucho.
+      placeholder: |
+        Febrero 2025 (10 meses antes de recibirme) — empecé a leer las páginas de los grupos
+        Abril 2025 — mandé 8 mails, me respondieron 4
+        ...
+  - type: textarea
+    id: applied
+    attributes:
+      label: ¿A dónde te postulaste?
+  - type: textarea
+    id: worked
+    attributes:
+      label: ¿Qué funcionó?
+  - type: textarea
+    id: differently
+    attributes:
+      label: ¿Qué harías distinto?
+  - type: textarea
+    id: advice
+    attributes:
+      label: Consejos para futuros egresados
+  - type: textarea
+    id: outcome
+    attributes:
+      label: ¿Dónde terminaste? (opcional)
+  - type: checkboxes
+    id: rules
+    attributes:
+      label: Antes de enviar
+      options:
+        - label: Todo lo que escribí sobre personas con nombre es positivo.
+          required: true

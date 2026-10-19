@@ -1,0 +1,29 @@
+name: Sugerir un cambio
+description: Avisá que algo está desactualizado, está mal o falta, o sugerí una sección o un área nueva.
+title: "[Sugerencia] "
+labels: ["sugerencia"]
+body:
+  - type: dropdown
+    id: kind
+    attributes:
+      label: ¿Qué tipo de sugerencia es?
+      options:
+        - Información desactualizada o incorrecta
+        - Falta información
+        - Área de la física o sección nueva
+        - Cambio en cómo está organizada la guía
+        - Otra
+    validations:
+      required: true
+  - type: input
+    id: where
+    attributes:
+      label: ¿Dónde?
+      description: El archivo o la sección, si corresponde.
+      placeholder: "p. ej. academia/materia-blanda/lugares.md"
+  - type: textarea
+    id: suggestion
+    attributes:
+      label: Tu sugerencia
+    validations:
+      required: true

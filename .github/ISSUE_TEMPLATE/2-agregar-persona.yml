@@ -1,0 +1,74 @@
+name: Agregar una persona
+description: Sumá un investigador o un contacto en la industria. Solo comentarios positivos.
+title: "[Persona] "
+labels: ["nueva-persona"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **Solo comentarios positivos.** Si tu experiencia no fue buena (incluido no recibir respuesta), dejá los comentarios vacíos. Un campo vacío no significa nada: mucha gente lo deja en blanco.
+        Solo información pública y profesional: poné un link a su página pública en lugar de copiar su dirección de mail.
+  - type: dropdown
+    id: section
+    attributes:
+      label: Sección
+      options:
+        - Interdisciplinaria
+        - Materia blanda
+        - Materia condensada
+        - Partículas
+        - Industria
+        - General (todas las áreas)
+        - Otra área (escribila abajo)
+    validations:
+      required: true
+  - type: input
+    id: name
+    attributes:
+      label: Nombre e institución o empresa
+      placeholder: "p. ej. Dra. Ana Ejemplo — Universidad de Ejemplópolis"
+    validations:
+      required: true
+  - type: input
+    id: website
+    attributes:
+      label: Página pública (sitio del grupo, LinkedIn, ...)
+  - type: input
+    id: topics
+    attributes:
+      label: Temas de investigación o puesto
+  - type: input
+    id: positions
+    attributes:
+      label: Posiciones que ofrece
+      placeholder: "doctorado / maestría / posdoc / pasantías / referencias / no se sabe"
+  - type: dropdown
+    id: argentina
+    attributes:
+      label: ¿Recibe estudiantes de Argentina?
+      options:
+        - "Sí"
+        - "No se sabe"
+  - type: textarea
+    id: contact
+    attributes:
+      label: Cómo hacer el contacto
+      description: Lo que te funcionó, p. ej. "mail corto con CV", "postularse primero a la escuela de posgrado".
+  - type: textarea
+    id: feedback
+    attributes:
+      label: Comentarios positivos
+      description: Solo comentarios positivos. Si no, dejalo vacío.
+  - type: input
+    id: author
+    attributes:
+      label: Tu nombre o usuario de GitHub, y el año en que hiciste el contacto
+  - type: checkboxes
+    id: rules
+    attributes:
+      label: Antes de enviar
+      options:
+        - label: Los comentarios que escribí son positivos, o los dejé vacíos.
+          required: true
+        - label: Solo incluí información pública y profesional.
+          required: true
