@@ -1,0 +1,139 @@
+# Crea una carpeta nueva en academia/ a partir de plantillas/nueva-area/
+# y suma el área a academia/README.md, a los formularios de issues y a general/encuesta.md.
+# Se usa desde la pestaña Actions → Agregar área → Run workflow.
+
+name: Agregar área
+
+on:
+  workflow_dispatch:
+    inputs:
+      nombre:
+        description: "Nombre del área, tal como querés que se vea (p. ej. Física médica)"
+        required: true
+        type: string
+      incluye:
+        description: "Temas que incluye, para la tabla de academia/README.md (opcional; p. ej. radioterapia, dosimetría, imágenes médicas)"
+        required: false
+        type: string
+
+permissions:
+  contents: write
+
+concurrency:
+  group: agregar-area
+
+jobs:
+  agregar-area:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Descargar el repositorio
+        uses: actions/checkout@v4
+
+      - name: Crear la carpeta y actualizar las listas
+        env:
+          NOMBRE: ${{ inputs.nombre }}
+          INCLUYE: ${{ inputs.incluye }}
+        run: |
+          python3 - <<'PY'
+          import os, re, shutil, sys, unicodedata
+          from pathlib import Path
+
+          name = ' '.join(os.environ.get('NOMBRE', '').split())
+          incluye = ' '.join(os.environ.get('INCLUYE', '').split()).replace('|', '/') or '—'
+          summary_path = os.environ.get('GITHUB_STEP_SUMMARY')
+
+          def fail(msg):
+              print('::error::' + msg)
+              if summary_path:
+                  with open(summary_path, 'a', encoding='utf-8') as s:
+                      s.write('### ❌ No se agregó el área\n\n' + msg + '\n')
+              sys.exit(1)
+
+          def slugify(text):
+              text = unicodedata.normalize('NFKD', text).encode('ascii', 'ignore').decode()
+              return re.sub(r'[^a-zA-Z0-9]+', '-', text).strip('-').lower()
+
+          if not name:
+              fail('Falta el nombre del área.')
+          slug = slugify(name)
+          if not slug:
+              fail('El nombre tiene que tener al menos una letra o un número.')
+
+          dest = Path('academia') / slug
+          if dest.exists():
+              fail(f'Ya existe la carpeta `{dest}`. Si es otra área, elegí un nombre distinto.')
+
+          # Dentro de una oración: "doctorados en física médica" (sin tocar siglas como "QED").
+          inline = name[0].lower() + name[1:] if len(name) > 1 and not name[1].isupper() else name
+
+          # 1. Carpeta nueva a partir de la plantilla
+          shutil.copytree('plantillas/nueva-area', dest)
+          for f in dest.rglob('*.md'):
+              t = f.read_text(encoding='utf-8')
+              t = re.sub(r'(?<=en |de )NOMBRE DEL ÁREA', inline, t)
+              t = t.replace('NOMBRE DEL ÁREA', name)
+              f.write_text(t, encoding='utf-8')
+
+          # 2. Tabla de academia/README.md, en orden alfabético
+          readme = Path('academia/README.md')
+          lines = readme.read_text(encoding='utf-8').splitlines()
+          row_re = re.compile(r'^\| \[.*?\]\(([^)/]+)/\)')
+          rows = [i for i, l in enumerate(lines) if row_re.match(l)]
+          new_row = f'| [{name}]({slug}/) | {incluye} |'
+          if rows:
+              at = rows[-1] + 1
+              for i in rows:
+                  if row_re.match(lines[i]).group(1) > slug:
+                      at = i
+                      break
+          else:
+              at = next(i for i, l in enumerate(lines) if l.startswith('|---')) + 1
+          lines.insert(at, new_row)
+          readme.write_text('\n'.join(lines) + '\n', encoding='utf-8')
+
+          # 3. Listas desplegables de los formularios (las opciones que van antes de "Industria")
+          def option_key(line):
+              return slugify(line.strip()[2:].strip('"'))
+
+          quoted = '"' + name.replace('\\', '\\\\').replace('"', '\\"') + '"'
+          for form in sorted(Path('.github/ISSUE_TEMPLATE').glob('*.yml')):
+              lines = form.read_text(encoding='utf-8').splitlines()
+              for i, l in enumerate(lines):
+                  if l.strip() == '- Industria':
+                      indent = l[:len(l) - len(l.lstrip())]
+                      j = i
+                      while j > 0 and lines[j - 1].startswith(indent + '- '):
+                          j -= 1
+                      block = lines[j:i]
+                      if all(option_key(b) != slug for b in block):
+                          block.append(indent + '- ' + quoted)
+                          block.sort(key=option_key)
+                          lines[j:i] = block
+                          form.write_text('\n'.join(lines) + '\n', encoding='utf-8')
+                      break
+
+          # 4. Lista de áreas en general/encuesta.md (antes de "Otra")
+          enc = Path('general/encuesta.md')
+          t = enc.read_text(encoding='utf-8')
+          enc.write_text(t.replace(' · Otra\n', f' · {name} · Otra\n', 1), encoding='utf-8')
+
+          if summary_path:
+              with open(summary_path, 'a', encoding='utf-8') as s:
+                  s.write(
+                      f'### ✅ Área agregada: {name}\n\n'
+                      f'- Carpeta nueva: `academia/{slug}/`, con entradas de EJEMPLO\n'
+                      '- Sumada a `academia/README.md`, a los formularios de issues y a `general/encuesta.md`\n\n'
+                      f'**Falta una cosa a mano:** agregar *{name}* como opción en la pregunta *Área* '
+                      'del formulario de Google.\n'
+                  )
+          PY
+
+      - name: Guardar los cambios
+        env:
+          NOMBRE: ${{ inputs.nombre }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Agregar área: $NOMBRE"
+          git push
