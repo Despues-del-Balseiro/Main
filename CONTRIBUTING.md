@@ -71,6 +71,6 @@ Cloná el repositorio, creá una rama, hacé commit y abrí un pull request. Un 
 
 ## Agregar un área nueva
 
-Si tu área no está (física médica, información cuántica, astrofísica, …), abrí un issue de *Sugerir un cambio* y alguien del equipo de mantenimiento crea la carpeta.
+Si tu área no está (física médica, información cuántica, astrofísica, …), abrí un issue de *Sugerir un cambio* y alguien creará la carpeta.
 
 Si usás Git: copiá [`plantillas/nueva-area/`](plantillas/nueva-area/) dentro de `academia/`, renombrala en minúsculas, sin tildes y con guiones (por ejemplo, `fisica-medica`), reemplazá `NOMBRE DEL ÁREA` en sus archivos y agregá el área a [academia/README.md](academia/README.md) y a las listas desplegables de los formularios en `.github/ISSUE_TEMPLATE/`.
