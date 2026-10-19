@@ -39,4 +39,7 @@ Notas para quienes cuidan el repositorio. Conviene que haya al menos dos persona
 
 | Nombre | Usuario de GitHub | Camada |
 |---|---|---|
+| Luciano Lopez | LucianoLopezib | IB23 |
+| | | |
+| | | |
 | | | |
