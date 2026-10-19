@@ -57,7 +57,6 @@ Cloná el repositorio, creá una rama, hacé commit y abrí un pull request. Un 
 
 ### En general
 
-- Escribí en español. Si preferís escribir en inglés, también vale.
 - No borres las entradas de EJEMPLO: le muestran el formato a quien llega por primera vez.
 
 ## Markdown en un minuto
