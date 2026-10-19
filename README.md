@@ -12,11 +12,8 @@ general/                 sirve para todas las áreas de la física
 ├── instituciones.md     qué son las grandes organizaciones de investigación y cómo contratan
 ├── encuesta.md          la encuesta anual: cuándo empezar a buscar
 └── cuando-empezar.md    resultados de la encuesta, año por año
-academia/                maestrías y doctorados, una carpeta por área
-├── interdisciplinaria/
-├── materia-blanda/
-├── materia-condensada/
-└── particulas/
+academia/                maestrías y doctorados, una carpeta por área (lista en academia/README.md)
+└── <área>/
     ├── lugares.md       universidades, institutos y programas, con fechas límite
     ├── personas.md      investigadores a los que vale la pena contactar
     └── historias/       un archivo por egresado: qué hizo y qué aprendió
