@@ -57,6 +57,7 @@ Cloná el repositorio, creá una rama, hacé commit y abrí un pull request. Un 
 
 ### En general
 
+- Escribí en español. Si preferís escribir en inglés, también vale.
 - No borres las entradas de EJEMPLO: le muestran el formato a quien llega por primera vez.
 
 ## Markdown en un minuto
@@ -71,6 +72,12 @@ Cloná el repositorio, creá una rama, hacé commit y abrí un pull request. Un 
 
 ## Agregar un área nueva
 
-Si tu área no está (física médica, información cuántica, astrofísica, …), abrí un issue de *Sugerir un cambio* y alguien creará la carpeta.
+Si tu área no está (física médica, información cuántica, astrofísica, …), cualquier persona con permiso de escritura en el repositorio la puede crear en un minuto:
 
-Si usás Git: copiá [`plantillas/nueva-area/`](plantillas/nueva-area/) dentro de `academia/`, renombrala en minúsculas, sin tildes y con guiones (por ejemplo, `fisica-medica`), reemplazá `NOMBRE DEL ÁREA` en sus archivos y agregá el área a [academia/README.md](academia/README.md) y a las listas desplegables de los formularios en `.github/ISSUE_TEMPLATE/`.
+1. Andá a la pestaña **Actions** y elegí **Agregar área** en la lista de la izquierda.
+2. Hacé clic en **Run workflow**, escribí el nombre del área tal como querés que se vea (por ejemplo, *Física médica*) y, si querés, los temas que incluye.
+3. Hacé clic en el botón verde **Run workflow**.
+
+En menos de un minuto aparece la carpeta nueva en `academia/`, con sus archivos y entradas de EJEMPLO, y el área se suma a la tabla de [academia/README.md](academia/README.md), a los formularios y a [general/encuesta.md](general/encuesta.md). Lo único que queda a mano es agregarla como opción en la pregunta *Área* de la encuesta de Google Forms.
+
+Si no tenés permiso de escritura, abrí un issue de *Sugerir un cambio* y alguien del equipo de mantenimiento la crea.
