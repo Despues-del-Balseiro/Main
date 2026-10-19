@@ -1,0 +1,80 @@
+name: Agregar un lugar
+description: Sumá una universidad, un instituto, un programa o una empresa. Alguien del equipo lo pasa al archivo que corresponde.
+title: "[Lugar] "
+labels: ["nuevo-lugar"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Completá lo que sepas y dejá el resto vacío. Las fechas exactas cambian cada año, así que el cierre *habitual* suele ser lo más útil.
+  - type: dropdown
+    id: section
+    attributes:
+      label: Sección
+      options:
+        - Interdisciplinaria
+        - Materia blanda
+        - Materia condensada
+        - Partículas
+        - Industria
+        - General (todas las áreas)
+        - Otra área (escribila abajo)
+    validations:
+      required: true
+  - type: input
+    id: name
+    attributes:
+      label: Institución o empresa, y programa o puesto
+      placeholder: "p. ej. Universidad de Ejemplópolis — Escuela de Posgrado en Materiales Cuánticos"
+    validations:
+      required: true
+  - type: input
+    id: location
+    attributes:
+      label: País y ciudad
+      description: Para trabajos, aclará si se puede trabajar en forma remota desde Argentina.
+  - type: dropdown
+    id: type
+    attributes:
+      label: Tipo de posición
+      multiple: true
+      options:
+        - Doctorado
+        - Maestría
+        - Posdoc
+        - Pasantía
+        - Trabajo
+        - Escuela de verano
+        - Otro
+  - type: input
+    id: topics
+    attributes:
+      label: Temas o sector
+  - type: input
+    id: typical-deadline
+    attributes:
+      label: Cierre habitual
+      placeholder: "p. ej. todos los años, a principios de diciembre"
+  - type: input
+    id: next-deadline
+    attributes:
+      label: Próximo cierre conocido
+      placeholder: "p. ej. 1 de diciembre de 2026"
+  - type: input
+    id: funding
+    attributes:
+      label: Financiamiento
+      placeholder: "p. ej. contrato de 4 años con sueldo / necesitás una beca propia"
+  - type: input
+    id: link
+    attributes:
+      label: Link a la página oficial
+  - type: textarea
+    id: notes
+    attributes:
+      label: Notas
+      description: Requisitos, cómo es la selección, consejos. Para trabajos, describí el proceso de selección y cuánto duró.
+  - type: input
+    id: author
+    attributes:
+      label: Tu nombre o usuario de GitHub (opcional)
