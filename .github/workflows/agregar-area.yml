@@ -28,6 +28,9 @@ jobs:
     steps:
       - name: Descargar el repositorio
         uses: actions/checkout@v4
+        with:
+          # La última versión de la rama, no la del momento en que se apretó el botón
+          ref: ${{ github.ref }}
 
       - name: Crear la carpeta y actualizar las listas
         env:
@@ -64,7 +67,7 @@ jobs:
               fail(f'Ya existe la carpeta `{dest}`. Si es otra área, elegí un nombre distinto.')
 
           # Dentro de una oración: "doctorados en física médica" (sin tocar siglas como "QED").
-          inline = name[0].lower() + name[1:] if len(name) > 1 and not name[1].isupper() else name
+          inline = ' '.join(w if (len(w) > 1 and w.isupper()) else w.lower() for w in name.split())
 
           # 1. Carpeta nueva a partir de la plantilla
           shutil.copytree('plantillas/nueva-area', dest)
@@ -136,4 +139,12 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add -A
           git commit -m "Agregar área: $NOMBRE"
-          git push
+          # Si alguien guardó otro cambio mientras corría la acción, lo incorpora y vuelve a intentar.
+          for intento in 1 2 3; do
+            if git push; then exit 0; fi
+            echo "La rama cambió mientras corría la acción; incorporando los cambios (intento $intento)…"
+            sleep 5
+            git pull --rebase origin "$GITHUB_REF_NAME" || { echo "::error::Hay un conflicto con otro cambio. Volvé a correr la acción."; exit 1; }
+          done
+          echo "::error::No se pudieron guardar los cambios después de 3 intentos. Volvé a correr la acción."
+          exit 1
