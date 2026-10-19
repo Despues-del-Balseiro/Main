@@ -2,7 +2,7 @@
 
 Lo que aprendimos buscando trabajo, maestrías y doctorados al terminar Física en el Instituto Balseiro, escrito por egresados para quienes vienen después.
 
-Casi todo el trabajo de decidir qué hacer después de recibirse es invisible: mails que nadie más ve, fechas límite que descubrís demasiado tarde, un investigador que resultó ser increíblemente útil. Cada año una camada nueva empieza de cero. Este repositorio es donde dejamos lo que encontramos.
+Casi todo el trabajo de decidir qué hacer después de recibirse es invisible: mails que nadie más ve, fechas límite que descubrís demasiado tarde, un investigador que resultó ser increíblemente útil. La idea es evitar que las camadas empiecen de cero cuando arrancan a buscar.
 
 ## Cómo está organizado
 
