@@ -1,6 +1,6 @@
 # Cuándo empezar a buscar
 
-Resultados de la [encuesta anual](encuesta.md). Cada celda cuenta cuántas personas eligieron esa opción; "m" significa meses antes de recibirse. Compará *Empezó a buscar* con *Recomendaría empezar*: la diferencia es la lección.
+Resultados de la [encuesta anual](encuesta.md). Cada celda cuenta cuántas personas eligieron ese período. Los meses son los del **último año**, es decir, el año calendario en que se recibieron. Compará *Empezó a buscar* con *Recomendaría empezar*: la diferencia es la lección.
 
 ## Cómo agregar un año (equipo de mantenimiento)
 
@@ -14,21 +14,33 @@ Abrí la plantilla de abajo, apretá el botón de copiar y pegala en **Resultado
 
 **Búsqueda de doctorado o maestría** (n = )
 
-| | > 12 m | 9–12 m | 6–9 m | 3–6 m | 0–3 m | Después de recibirse |
-|---|---|---|---|---|---|---|
-| Empezó a buscar | | | | | | |
-| Primera oferta | | | | | | |
-| Recomendaría empezar | | | | | | |
+| Período | Empezó a buscar | Primera oferta | Recomendaría empezar |
+|---|---|---|---|
+| Antes del último año | | | |
+| Ene–Feb | | | |
+| Mar–Abr | | | |
+| May–Jun | | | |
+| Jul–Ago | | | |
+| Sep–Oct | | | |
+| Nov–Dic | | | |
+| 0–3 meses después de recibirse | | | |
+| Más de 3 meses después | | | |
 
 No recibió oferta / sigue buscando:
 
 **Búsqueda de trabajo** (n = )
 
-| | > 12 m | 9–12 m | 6–9 m | 3–6 m | 0–3 m | Después de recibirse |
-|---|---|---|---|---|---|---|
-| Empezó a buscar | | | | | | |
-| Primera oferta | | | | | | |
-| Recomendaría empezar | | | | | | |
+| Período | Empezó a buscar | Primera oferta | Recomendaría empezar |
+|---|---|---|---|
+| Antes del último año | | | |
+| Ene–Feb | | | |
+| Mar–Abr | | | |
+| May–Jun | | | |
+| Jul–Ago | | | |
+| Sep–Oct | | | |
+| Nov–Dic | | | |
+| 0–3 meses después de recibirse | | | |
+| Más de 3 meses después | | | |
 
 No recibió oferta / sigue buscando:
 
@@ -47,25 +59,37 @@ No recibió oferta / sigue buscando:
 
 **Búsqueda de doctorado o maestría** (n = 9)
 
-| | > 12 m | 9–12 m | 6–9 m | 3–6 m | 0–3 m | Después de recibirse |
-|---|---|---|---|---|---|---|
-| Empezó a buscar | 1 | 2 | 3 | 2 | 1 | 0 |
-| Primera oferta | 0 | 0 | 1 | 2 | 3 | 2 |
-| Recomendaría empezar | 3 | 4 | 2 | 0 | 0 | 0 |
+| Período | Empezó a buscar | Primera oferta | Recomendaría empezar |
+|---|---|---|---|
+| Antes del último año | 1 | 0 | 3 |
+| Ene–Feb | 0 | 0 | 4 |
+| Mar–Abr | 2 | 0 | 2 |
+| May–Jun | 3 | 0 | 0 |
+| Jul–Ago | 2 | 0 | 0 |
+| Sep–Oct | 1 | 1 | 0 |
+| Nov–Dic | 0 | 2 | 0 |
+| 0–3 meses después de recibirse | 0 | 4 | 0 |
+| Más de 3 meses después | 0 | 1 | 0 |
 
 No recibió oferta / sigue buscando: 1
 
 **Búsqueda de trabajo** (n = 6)
 
-| | > 12 m | 9–12 m | 6–9 m | 3–6 m | 0–3 m | Después de recibirse |
-|---|---|---|---|---|---|---|
-| Empezó a buscar | 0 | 0 | 1 | 1 | 3 | 1 |
-| Primera oferta | 0 | 0 | 0 | 1 | 2 | 2 |
-| Recomendaría empezar | 0 | 1 | 3 | 2 | 0 | 0 |
+| Período | Empezó a buscar | Primera oferta | Recomendaría empezar |
+|---|---|---|---|
+| Antes del último año | 0 | 0 | 0 |
+| Ene–Feb | 0 | 0 | 0 |
+| Mar–Abr | 0 | 0 | 1 |
+| May–Jun | 0 | 0 | 3 |
+| Jul–Ago | 1 | 0 | 2 |
+| Sep–Oct | 1 | 0 | 0 |
+| Nov–Dic | 3 | 1 | 0 |
+| 0–3 meses después de recibirse | 1 | 3 | 0 |
+| Más de 3 meses después | 0 | 1 | 0 |
 
 No recibió oferta / sigue buscando: 1
 
-**Conclusión principal:** la mayoría empezó a buscar doctorado o maestría 6–9 meses antes de recibirse, pero recomendaría empezar 9–12 meses antes. Para trabajo, la mayoría empezó 0–3 meses antes y recomendaría hacerlo 6–9 meses antes.
+**Conclusión principal:** la mayoría empezó a buscar doctorado o maestría entre marzo y agosto del último año, pero recomendaría empezar antes: en enero–febrero, o incluso antes del último año. Para trabajo, la mitad empezó en noviembre–diciembre, y la mayoría recomendaría empezar entre mayo y agosto.
 
 **Comentarios** (solo de quienes aceptaron ser citados)
 - "Los cierres de las escuelas de posgrado en noviembre me tomaron por sorpresa: estaba terminando la tesis."
