@@ -13,6 +13,7 @@ Andá a **Issues → New issue** y elegí un formulario:
 | Agregar un lugar | sumar una universidad, un instituto, un programa o una empresa |
 | Agregar una persona | sumar un investigador o un contacto en la industria |
 | Contar tu historia | contar cómo te fue en tu búsqueda |
+| Agregar una ciudad | contar cuánto cuesta vivir en una ciudad y cómo es el día a día |
 | Sugerir un cambio | avisar que algo está desactualizado, está mal o falta |
 
 Alguien del equipo de mantenimiento copia tus respuestas en el archivo que corresponde. Los issues los puede ver cualquiera que tenga acceso al repositorio.
@@ -28,6 +29,8 @@ Los nombres de los botones están en inglés, tal como aparecen en GitHub.
 5. Hacé clic en **Commit changes…**. Si GitHub te pregunta, elegí **Create a new branch and start a pull request** y después **Propose changes**. Alguien del equipo de mantenimiento lo va a revisar.
 
 **Para agregar tu historia:** andá a la carpeta `historias/` de tu área, hacé clic en **Add file → Create new file**, ponele de nombre `AAAA-nombre-apellido.md` (AAAA = el año en que te recibiste) y pegá la [plantilla de historia](plantillas/historia.md).
+
+**Para agregar una ciudad:** seguí los pasos de [ciudades/](ciudades/). Si la ciudad ya tiene archivo, editá ese archivo en lugar de crear uno nuevo.
 
 ### 3. Usar Git
 
