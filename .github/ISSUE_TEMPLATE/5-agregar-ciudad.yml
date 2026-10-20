@@ -1,0 +1,79 @@
+name: Agregar una ciudad
+description: Contá cuánto cuesta vivir en una ciudad y cómo es el día a día. Alguien del equipo lo pasa a la carpeta ciudades.
+title: "[Ciudad] "
+labels: ["nueva-ciudad"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Completá lo que sepas y dejá el resto vacío. Si la ciudad ya tiene archivo en `ciudades/`, también podés usar este formulario: lo sumamos a lo que ya hay.
+        Escribí los montos **netos, por mes, en moneda local y para una persona**.
+  - type: input
+    id: city
+    attributes:
+      label: Ciudad y país
+      placeholder: "p. ej. Heidelberg, Alemania"
+    validations:
+      required: true
+  - type: input
+    id: when
+    attributes:
+      label: ¿Cuándo viviste ahí y qué hacías?
+      placeholder: "p. ej. 2024–2026, doctorado en materia blanda"
+  - type: input
+    id: currency
+    attributes:
+      label: Moneda
+      placeholder: "p. ej. euro (€)"
+  - type: textarea
+    id: costs
+    attributes:
+      label: Costo de vida mensual
+      description: Completá lo que sepas. Si varía mucho, poné un rango.
+      value: |
+        - Habitación en departamento compartido:
+        - Monoambiente:
+        - Supermercado:
+        - Transporte público (abono mensual):
+        - Seguro de salud:
+        - Teléfono e internet:
+        - Otros (salidas, deporte, ...):
+  - type: textarea
+    id: salaries
+    attributes:
+      label: Sueldos o becas de referencia
+      description: Cuánto se cobra por mes en un doctorado, un posdoc o un trabajo. Aclará si es neto o bruto.
+  - type: textarea
+    id: housing
+    attributes:
+      label: Vivienda
+      description: Dónde buscar, con cuánta anticipación, depósito, residencias, estafas comunes.
+  - type: textarea
+    id: paperwork
+    attributes:
+      label: Trámites al llegar
+      description: Visa, registro de domicilio, cuenta bancaria... En qué orden y cuánto tardaron.
+  - type: textarea
+    id: language
+    attributes:
+      label: Idioma
+      description: ¿Alcanza con inglés en el trabajo? ¿Y en el día a día?
+  - type: textarea
+    id: life
+    attributes:
+      label: Vivir ahí
+      description: Clima, transporte, comunidad argentina o latina, seguridad, lo que quieras contar.
+  - type: textarea
+    id: experience
+    attributes:
+      label: Tu experiencia
+      description: Lo que te hubiera gustado saber antes de llegar.
+  - type: textarea
+    id: sources
+    attributes:
+      label: Fuentes (opcional)
+      description: Links a las páginas de donde sacaste datos.
+  - type: input
+    id: author
+    attributes:
+      label: Tu nombre o usuario de GitHub (opcional)
