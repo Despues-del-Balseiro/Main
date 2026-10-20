@@ -17,7 +17,7 @@ Notas para quienes cuidan el repositorio. Conviene que haya al menos dos persona
    git push -u origin main
    ```
    Sin Git, usá **Add file → Upload files** y arrastrá el contenido de la carpeta. Después verificá que se haya subido la carpeta `.github`: algunos sistemas ocultan las carpetas cuyo nombre empieza con un punto, y sin ella no aparecen los formularios.
-4. **Creá las etiquetas** que usan los formularios (**Issues → Labels → New label**): `sugerencia`, `nuevo-lugar`, `nueva-persona`, `nueva-historia`.
+4. **Creá las etiquetas** que usan los formularios (**Issues → Labels → New label**): `sugerencia`, `nuevo-lugar`, `nueva-persona`, `nueva-historia`, `nueva-ciudad`.
 5. **Creá la encuesta** en Google Forms con las preguntas de [general/encuesta.md](general/encuesta.md). Desactivá la opción de recopilar direcciones de correo electrónico. Reemplazá `LINK_ENCUESTA` en [README.md](README.md) y en [general/encuesta.md](general/encuesta.md) por el link del formulario.
 6. *Opcional:* activá **Discussions** (Settings → General → Features) para preguntas abiertas que no encajan en un issue.
 
