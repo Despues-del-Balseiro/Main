@@ -1,7 +1,7 @@
 # 2026 — Luciano Lopez
 
 - **Área:** Interdisciplinaria
-- **Tema de tesis:** Modelos estadístico de caminatas basadas en el comportamiento de las tortugas patagónicas
+- **Tema de tesis:** Modelos estadísticos de caminatas basadas en el comportamiento de las tortugas patagónicas
 - **Me recibí:** diciembre 2026
 - **Busqué:** doctorado
 
