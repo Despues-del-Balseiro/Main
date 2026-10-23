@@ -1,0 +1,210 @@
+# Publica en el repositorio el contenido de un issue aprobado.
+# Se usa poniéndole la etiqueta "publicar" a un issue (solo pueden hacerlo quienes tienen permiso de escritura).
+# Por ahora publica historias (formulario "Contar tu historia"): crea el archivo en la carpeta
+# historias/ del área, deja un comentario con el link y cierra el issue.
+
+name: Publicar issue
+
+on:
+  issues:
+    types: [labeled]
+
+permissions:
+  contents: write
+  issues: write
+
+jobs:
+  publicar:
+    # La comparación no distingue mayúsculas: sirve "publicar" o "Publicar".
+    if: github.event.label.name == 'publicar'
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+      NUMERO: ${{ github.event.issue.number }}
+      ETIQUETA: ${{ github.event.label.name }}
+      RAMA: ${{ github.event.repository.default_branch }}
+    steps:
+      - name: Descargar el repositorio
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+
+      - name: Armar el archivo a partir del issue
+        id: preparar
+        env:
+          CUERPO: ${{ github.event.issue.body }}
+        run: |
+          python3 - <<'PY'
+          import os, re, unicodedata
+          from pathlib import Path
+
+          body = (os.environ.get('CUERPO') or '').replace('\r\n', '\n')
+          number = os.environ['NUMERO']
+          repo = os.environ['GITHUB_REPOSITORY']
+          branch = os.environ['RAMA']
+          tmp = Path(os.environ['RUNNER_TEMP'])
+
+          def slugify(text):
+              text = unicodedata.normalize('NFKD', text).encode('ascii', 'ignore').decode()
+              return re.sub(r'[^a-zA-Z0-9]+', '-', text).strip('-').lower()
+
+          def finish(ok, comment, commit_msg=''):
+              (tmp / 'comentario.md').write_text(comment, encoding='utf-8')
+              (tmp / 'mensaje.txt').write_text(commit_msg, encoding='utf-8')
+              with open(os.environ['GITHUB_OUTPUT'], 'a', encoding='utf-8') as out:
+                  out.write('ok=' + ('true' if ok else 'false') + '\n')
+              raise SystemExit(0)
+
+          # 1. Las preguntas del formulario (título → id), leídas del formulario mismo
+          form = Path('.github/ISSUE_TEMPLATE/3-contar-historia.yml').read_text(encoding='utf-8')
+          fields, current_id = {}, None
+          for line in form.splitlines():
+              m = re.match(r'\s+id:\s*(\S+)', line)
+              if m:
+                  current_id = m.group(1)
+                  continue
+              m = re.match(r'\s+label:\s*(.+)', line)
+              if m and current_id:
+                  fields[m.group(1).strip().strip('"\'')] = current_id
+                  current_id = None
+
+          # 2. Separar las respuestas: GitHub las escribe como "### Pregunta" + respuesta
+          values, current, buf = {}, None, []
+          for line in body.split('\n'):
+              heading = line[4:].strip() if line.startswith('### ') else None
+              if heading in fields:
+                  if current:
+                      values[current] = '\n'.join(buf).strip()
+                  current, buf = fields[heading], []
+              elif current:
+                  buf.append(line)
+          if current:
+              values[current] = '\n'.join(buf).strip()
+          values = {k: ('' if v == '_No response_' else v) for k, v in values.items()}
+
+          if 'name' not in values or 'year' not in values:
+              finish(False,
+                  'Por ahora, la etiqueta `publicar` solo publica **historias** '
+                  '(issues del formulario *Contar tu historia*).\n\n'
+                  'Este issue hay que pasarlo a mano al archivo que corresponde, '
+                  'usando la plantilla de ese archivo. Después cerralo.')
+
+          # 3. Revisar lo indispensable
+          name = ' '.join(values.get('name', '').split())
+          area = ' '.join(values.get('section', '').split())
+          year_match = re.search(r'\b(19|20)\d{2}\b', values.get('year', ''))
+          area_slug = slugify(area)
+          problems = []
+          if not name:
+              problems.append('falta el **nombre para mostrar**.')
+          if not year_match:
+              problems.append('el **año en que te recibiste** tiene que tener 4 cifras (por ejemplo, 2026).')
+          if area_slug == 'industria':
+              folder = Path('industria/historias')
+          elif area_slug and (Path('academia') / area_slug).is_dir():
+              folder = Path('academia') / area_slug / 'historias'
+          else:
+              folder = None
+              problems.append(
+                  f'no hay una carpeta para el área **{area or "(vacía)"}**. '
+                  'Elegí un área de la lista o, si es nueva, creala primero con **Actions → Agregar área**.')
+          if problems:
+              finish(False,
+                  'No pude publicar la historia:\n\n'
+                  + '\n'.join('- ' + p for p in problems)
+                  + '\n\nEditá el issue (menú **⋯ → Edit**), corregí eso y volvé a poner la etiqueta `publicar`.')
+          year = year_match.group(0)
+
+          # 4. Armar el archivo con el formato de plantillas/historia.md
+          def keep_line_breaks(text):
+              lines, fence = [], False
+              for line in text.split('\n'):
+                  if line.strip().startswith('```'):
+                      fence = not fence
+                  elif not fence and line.strip() and not line.lstrip().startswith('|'):
+                      line = line.rstrip() + '  '
+                  lines.append(line)
+              return '\n'.join(lines).rstrip()
+
+          def as_list(text):
+              lines = text.split('\n')
+              if any(l.lstrip().startswith('|') for l in lines):
+                  return text
+              return '\n'.join(
+                  l if (not l.strip() or re.match(r'\s*([-*+]|\d+[.)])\s', l)) else '- ' + l.strip()
+                  for l in lines)
+
+          md = [f'# {year} — {name}', '']
+          md.append(f'- **Área:** {area}')
+          thesis = ' '.join(values.get('thesis', '').split())
+          if thesis:
+              md.append(f'- **Tema de tesis:** {thesis}')
+          md.append(f'- **Me recibí:** {year}')
+          looked_for = ' '.join(values.get('looked-for', '').split()).lower()
+          if looked_for:
+              md.append(f'- **Busqué:** {looked_for}')
+
+          sections = [
+              ('Qué estaba buscando', 'goal', keep_line_breaks),
+              ('Cronología', 'timeline', as_list),
+              ('Dónde me postulé', 'applied', keep_line_breaks),
+              ('Qué funcionó', 'worked', keep_line_breaks),
+              ('Qué haría distinto', 'differently', keep_line_breaks),
+              ('Consejos para futuros egresados', 'advice', keep_line_breaks),
+              ('Dónde terminé', 'outcome', keep_line_breaks),
+          ]
+          for title, key, fmt in sections:
+              text = values.get(key, '').strip()
+              if text:
+                  md += ['', f'## {title}', '', fmt(text)]
+          md += ['', f'<!-- Publicada desde el issue #{number} -->', '']
+
+          # 5. Nombre del archivo: AAAA-nombre-apellido.md
+          base = slugify(name)
+          if not base or base.startswith('anonim'):
+              base = f'anonimo-{number}'
+          path = folder / f'{year}-{base}.md'
+          if path.exists():
+              path = folder / f'{year}-{base}-{number}.md'
+          folder.mkdir(parents=True, exist_ok=True)
+          path.write_text('\n'.join(md), encoding='utf-8')
+
+          url = f'https://github.com/{repo}/blob/{branch}/{path.as_posix()}'
+          finish(True,
+              f'✅ Historia publicada en [`{path.as_posix()}`]({url}). ¡Gracias por contarla!\n\n'
+              'Si querés cambiar algo, abrí ese archivo y editalo con el ícono del lápiz.',
+              f'Publicar historia: {name} (#{number})\n')
+          PY
+
+      - name: Guardar el archivo, comentar y cerrar el issue
+        if: steps.preparar.outputs.ok == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -F "$RUNNER_TEMP/mensaje.txt"
+          # Si alguien guardó otro cambio mientras corría la acción, lo incorpora y vuelve a intentar.
+          for intento in 1 2 3; do
+            if git push origin "HEAD:$RAMA"; then
+              gh issue comment "$NUMERO" --repo "$GITHUB_REPOSITORY" --body-file "$RUNNER_TEMP/comentario.md"
+              gh issue close "$NUMERO" --repo "$GITHUB_REPOSITORY" --reason completed
+              exit 0
+            fi
+            echo "La rama cambió mientras corría la acción; incorporando los cambios (intento $intento)…"
+            sleep 5
+            git pull --rebase origin "$RAMA" || exit 1
+          done
+          exit 1
+
+      - name: Avisar en el issue si no se pudo publicar
+        if: always() && (steps.preparar.outputs.ok == 'false' || failure())
+        env:
+          OK: ${{ steps.preparar.outputs.ok }}
+        run: |
+          if [ "$OK" != "false" ]; then
+            printf '%s\n' 'No pude guardar la historia en el repositorio. Volvé a poner la etiqueta `publicar` en unos minutos. Si vuelve a fallar, mirá el detalle en la pestaña **Actions**.' > "$RUNNER_TEMP/comentario.md"
+          fi
+          gh issue comment "$NUMERO" --repo "$GITHUB_REPOSITORY" --body-file "$RUNNER_TEMP/comentario.md"
+          # Saca la etiqueta para que se pueda volver a poner después de corregir el issue.
+          gh issue edit "$NUMERO" --repo "$GITHUB_REPOSITORY" --remove-label "$ETIQUETA" || true
+          exit 1
