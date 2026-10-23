@@ -1,7 +1,11 @@
 # Publica en el repositorio el contenido de un issue aprobado.
 # Se usa poniéndole la etiqueta "publicar" a un issue (solo pueden hacerlo quienes tienen permiso de escritura).
-# Por ahora publica historias (formulario "Contar tu historia"): crea el archivo en la carpeta
-# historias/ del área, deja un comentario con el link y cierra el issue.
+# Reconoce el formulario por las preguntas del issue:
+#   Contar tu historia  → crea historias/AAAA-nombre-apellido.md en la carpeta del área
+#   Agregar un lugar    → agrega una entrada al final de lugares.md del área
+#   Agregar una persona → agrega una entrada en personas.md (o suma el contacto si la persona ya está)
+#   Agregar una ciudad  → crea ciudades/pais-ciudad.md (o suma una experiencia si la ciudad ya está)
+# Después deja un comentario con el link y cierra el issue. Si algo falta, lo explica y saca la etiqueta.
 
 name: Publicar issue
 
@@ -29,21 +33,32 @@ jobs:
         with:
           ref: ${{ github.event.repository.default_branch }}
 
-      - name: Armar el archivo a partir del issue
+      - name: Armar el cambio a partir del issue
         id: preparar
         env:
           CUERPO: ${{ github.event.issue.body }}
+          AUTOR: ${{ github.event.issue.user.login }}
+          CREADO: ${{ github.event.issue.created_at }}
         run: |
           python3 - <<'PY'
           import os, re, unicodedata
+          from datetime import date
           from pathlib import Path
 
           body = (os.environ.get('CUERPO') or '').replace('\r\n', '\n')
           number = os.environ['NUMERO']
           repo = os.environ['GITHUB_REPOSITORY']
           branch = os.environ['RAMA']
+          login = os.environ.get('AUTOR') or 'anonimo'
           tmp = Path(os.environ['RUNNER_TEMP'])
 
+          MESES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio',
+                   'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre']
+          created = os.environ.get('CREADO') or date.today().isoformat()
+          year_now, month_now = created[:4], int(created[5:7])
+          fecha = f'{MESES[month_now - 1]} {year_now}'
+
+          # ---------- utilidades ----------
           def slugify(text):
               text = unicodedata.normalize('NFKD', text).encode('ascii', 'ignore').decode()
               return re.sub(r'[^a-zA-Z0-9]+', '-', text).strip('-').lower()
@@ -55,67 +70,28 @@ jobs:
                   out.write('ok=' + ('true' if ok else 'false') + '\n')
               raise SystemExit(0)
 
-          # 1. Las preguntas del formulario (título → id), leídas del formulario mismo
-          form = Path('.github/ISSUE_TEMPLATE/3-contar-historia.yml').read_text(encoding='utf-8')
-          fields, current_id = {}, None
-          for line in form.splitlines():
-              m = re.match(r'\s+id:\s*(\S+)', line)
-              if m:
-                  current_id = m.group(1)
-                  continue
-              m = re.match(r'\s+label:\s*(.+)', line)
-              if m and current_id:
-                  fields[m.group(1).strip().strip('"\'')] = current_id
-                  current_id = None
-
-          # 2. Separar las respuestas: GitHub las escribe como "### Pregunta" + respuesta
-          values, current, buf = {}, None, []
-          for line in body.split('\n'):
-              heading = line[4:].strip() if line.startswith('### ') else None
-              if heading in fields:
-                  if current:
-                      values[current] = '\n'.join(buf).strip()
-                  current, buf = fields[heading], []
-              elif current:
-                  buf.append(line)
-          if current:
-              values[current] = '\n'.join(buf).strip()
-          values = {k: ('' if v == '_No response_' else v) for k, v in values.items()}
-
-          if 'name' not in values or 'year' not in values:
+          def fail(*problems):
               finish(False,
-                  'Por ahora, la etiqueta `publicar` solo publica **historias** '
-                  '(issues del formulario *Contar tu historia*).\n\n'
-                  'Este issue hay que pasarlo a mano al archivo que corresponde, '
-                  'usando la plantilla de ese archivo. Después cerralo.')
-
-          # 3. Revisar lo indispensable
-          name = ' '.join(values.get('name', '').split())
-          area = ' '.join(values.get('section', '').split())
-          year_match = re.search(r'\b(19|20)\d{2}\b', values.get('year', ''))
-          area_slug = slugify(area)
-          problems = []
-          if not name:
-              problems.append('falta el **nombre para mostrar**.')
-          if not year_match:
-              problems.append('el **año en que te recibiste** tiene que tener 4 cifras (por ejemplo, 2026).')
-          if area_slug == 'industria':
-              folder = Path('industria/historias')
-          elif area_slug and (Path('academia') / area_slug).is_dir():
-              folder = Path('academia') / area_slug / 'historias'
-          else:
-              folder = None
-              problems.append(
-                  f'no hay una carpeta para el área **{area or "(vacía)"}**. '
-                  'Elegí un área de la lista o, si es nueva, creala primero con **Actions → Agregar área**.')
-          if problems:
-              finish(False,
-                  'No pude publicar la historia:\n\n'
+                  'No pude publicar este issue:\n\n'
                   + '\n'.join('- ' + p for p in problems)
                   + '\n\nEditá el issue (menú **⋯ → Edit**), corregí eso y volvé a poner la etiqueta `publicar`.')
-          year = year_match.group(0)
 
-          # 4. Armar el archivo con el formato de plantillas/historia.md
+          def published(kind, path, text):
+              url = f'https://github.com/{repo}/blob/{branch}/{path.as_posix()}'
+              finish(True,
+                  f'✅ {text} [`{path.as_posix()}`]({url}). ¡Gracias!\n\n'
+                  'Si hay que cambiar algo, abrí ese archivo y editalo con el ícono del lápiz.',
+                  f'Publicar {kind}: {title_for_commit} (#{number})\n')
+
+          def one(text, empty='?'):
+              """Una respuesta en una sola línea."""
+              return ' '.join((text or '').split()) or empty
+
+          def multi(text):
+              """Una respuesta de varias líneas dentro de una viñeta."""
+              lines = [l.strip() for l in (text or '').split('\n') if l.strip()]
+              return '  \n  '.join(lines)
+
           def keep_line_breaks(text):
               lines, fence = [], False
               for line in text.split('\n'):
@@ -134,49 +110,337 @@ jobs:
                   l if (not l.strip() or re.match(r'\s*([-*+]|\d+[.)])\s', l)) else '- ' + l.strip()
                   for l in lines)
 
-          md = [f'# {year} — {name}', '']
-          md.append(f'- **Área:** {area}')
-          thesis = ' '.join(values.get('thesis', '').split())
-          if thesis:
-              md.append(f'- **Tema de tesis:** {thesis}')
-          md.append(f'- **Me recibí:** {year}')
-          looked_for = ' '.join(values.get('looked-for', '').split()).lower()
-          if looked_for:
-              md.append(f'- **Busqué:** {looked_for}')
+          def area_folder(area):
+              s = slugify(area)
+              if s == 'industria':
+                  return Path('industria')
+              if s and (Path('academia') / s).is_dir():
+                  return Path('academia') / s
+              return None
 
-          sections = [
-              ('Qué estaba buscando', 'goal', keep_line_breaks),
-              ('Cronología', 'timeline', as_list),
-              ('Dónde me postulé', 'applied', keep_line_breaks),
-              ('Qué funcionó', 'worked', keep_line_breaks),
-              ('Qué haría distinto', 'differently', keep_line_breaks),
-              ('Consejos para futuros egresados', 'advice', keep_line_breaks),
-              ('Dónde terminé', 'outcome', keep_line_breaks),
-          ]
-          for title, key, fmt in sections:
-              text = values.get(key, '').strip()
-              if text:
-                  md += ['', f'## {title}', '', fmt(text)]
-          md += ['', f'<!-- Publicada desde el issue #{number} -->', '']
+          def no_folder_problem(area, extra=''):
+              return (f'no hay una carpeta para la sección **{area or "(vacía)"}**. '
+                      'Elegí un área de la lista o, si es nueva, creala primero con **Actions → Agregar área**.' + extra)
 
-          # 5. Nombre del archivo: AAAA-nombre-apellido.md
-          base = slugify(name)
-          if not base or base.startswith('anonim'):
-              base = f'anonimo-{number}'
-          path = folder / f'{year}-{base}.md'
-          if path.exists():
-              path = folder / f'{year}-{base}-{number}.md'
-          folder.mkdir(parents=True, exist_ok=True)
-          path.write_text('\n'.join(md), encoding='utf-8')
+          def append_entry(path, text):
+              content = path.read_text(encoding='utf-8').rstrip('\n')
+              path.write_text(content + '\n\n' + text.strip('\n') + '\n', encoding='utf-8')
 
-          url = f'https://github.com/{repo}/blob/{branch}/{path.as_posix()}'
-          finish(True,
-              f'✅ Historia publicada en [`{path.as_posix()}`]({url}). ¡Gracias por contarla!\n\n'
-              'Si querés cambiar algo, abrí ese archivo y editalo con el ícono del lápiz.',
-              f'Publicar historia: {name} (#{number})\n')
+          def headings(path):
+              """Títulos ### de las entradas reales (sin contar los ejemplos)."""
+              lines = path.read_text(encoding='utf-8').split('\n')
+              fence = False
+              for i, l in enumerate(lines):
+                  if l.strip().startswith('```'):
+                      fence = not fence
+                  elif not fence and l.startswith('### ') and not l[4:].startswith('EJEMPLO'):
+                      yield i, l[4:].strip()
+
+          def person_key(text):
+              name = re.split(r'\s+[—–-]\s+', text.strip())[0]
+              name = re.sub(r'^(dr|dra|prof|profa|ing|lic)\.?\s+', '', name.strip(), flags=re.I)
+              return slugify(name)
+
+          # ---------- 1. Reconocer el formulario por sus preguntas ----------
+          def read_form(path):
+              fields, current_id = {}, None
+              for line in path.read_text(encoding='utf-8').splitlines():
+                  m = re.match(r'\s+id:\s*(\S+)', line)
+                  if m:
+                      current_id = m.group(1)
+                      continue
+                  m = re.match(r'\s+label:\s*(.+)', line)
+                  if m and current_id:
+                      fields[m.group(1).strip().strip('"\'')] = current_id
+                      current_id = None
+              return fields
+
+          forms = {p.name: read_form(p) for p in sorted(Path('.github/ISSUE_TEMPLATE').glob('*.yml'))
+                   if p.name != 'config.yml'}
+          body_headings = {l[4:].strip() for l in body.split('\n') if l.startswith('### ')}
+          form_name = max(forms, key=lambda f: len(body_headings & set(forms[f])))
+          if len(body_headings & set(forms[form_name])) < 2:
+              finish(False,
+                  'No reconozco de qué formulario es este issue, así que no lo puedo publicar solo. '
+                  'Pasalo a mano al archivo que corresponde y después cerralo.')
+          fields = forms[form_name]
+
+          # ---------- 2. Separar las respuestas ("### Pregunta" + respuesta) ----------
+          values, current, buf = {}, None, []
+          for line in body.split('\n'):
+              heading = line[4:].strip() if line.startswith('### ') else None
+              if heading in fields:
+                  if current:
+                      values[current] = '\n'.join(buf).strip()
+                  current, buf = fields[heading], []
+              elif current:
+                  buf.append(line)
+          if current:
+              values[current] = '\n'.join(buf).strip()
+          values = {k: ('' if v == '_No response_' else v) for k, v in values.items()}
+          v = lambda key: values.get(key, '').strip()
+
+          author_field = one(v('author'), '')
+          who = author_field or f'@{login}'
+
+          # ---------- 3a. Historias ----------
+          if 'historia' in form_name:
+              name = one(v('name'), '')
+              area = one(v('section'), '')
+              year_match = re.search(r'\b(19|20)\d{2}\b', v('year'))
+              base_folder = area_folder(area)
+              problems = []
+              if not name:
+                  problems.append('falta el **nombre para mostrar**.')
+              if not year_match:
+                  problems.append('el **año en que te recibiste** tiene que tener 4 cifras (por ejemplo, 2026).')
+              if not base_folder:
+                  problems.append(no_folder_problem(area))
+              if problems:
+                  fail(*problems)
+              year = year_match.group(0)
+              folder = base_folder / 'historias'
+
+              md = [f'# {year} — {name}', '', f'- **Área:** {area}']
+              if v('thesis'):
+                  md.append(f'- **Tema de tesis:** {one(v("thesis"))}')
+              md.append(f'- **Me recibí:** {year}')
+              if v('looked-for'):
+                  md.append(f'- **Busqué:** {one(v("looked-for")).lower()}')
+              for title, key, fmt in [
+                      ('Qué estaba buscando', 'goal', keep_line_breaks),
+                      ('Cronología', 'timeline', as_list),
+                      ('Dónde me postulé', 'applied', keep_line_breaks),
+                      ('Qué funcionó', 'worked', keep_line_breaks),
+                      ('Qué haría distinto', 'differently', keep_line_breaks),
+                      ('Consejos para futuros egresados', 'advice', keep_line_breaks),
+                      ('Dónde terminé', 'outcome', keep_line_breaks)]:
+                  if v(key):
+                      md += ['', f'## {title}', '', fmt(v(key))]
+              md += ['', f'<!-- Publicada desde el issue #{number} -->', '']
+
+              base = slugify(name)
+              if not base or base.startswith('anonim'):
+                  base = f'anonimo-{number}'
+              path = folder / f'{year}-{base}.md'
+              if path.exists():
+                  path = folder / f'{year}-{base}-{number}.md'
+              folder.mkdir(parents=True, exist_ok=True)
+              path.write_text('\n'.join(md), encoding='utf-8')
+              title_for_commit = name
+              published('historia', path, 'Historia publicada en')
+
+          # ---------- 3b. Lugares ----------
+          elif 'lugar' in form_name:
+              name = one(v('name'), '')
+              area = one(v('section'), '')
+              folder = area_folder(area)
+              if not name:
+                  fail('falta el **nombre de la institución o empresa**.')
+              if not folder:
+                  extra = ''
+                  if slugify(area).startswith('general'):
+                      extra = (' Si es una institución o una beca que sirve para todas las áreas, '
+                               'pasala a mano a `general/instituciones.md` o `general/financiamiento.md`.')
+                  fail(no_folder_problem(area, extra))
+              path = folder / 'lugares.md'
+              for _, existing in headings(path):
+                  if slugify(existing) == slugify(name):
+                      fail(f'ya hay una entrada **{existing}** en `{path.as_posix()}`. '
+                           'Actualizala a mano con los datos de este issue y después cerralo.')
+
+              kind_of = one(v('type')).lower()
+              if folder.name == 'industria':
+                  deadline = one(v('typical-deadline'))
+                  if v('next-deadline'):
+                      deadline += f' (próximo: {one(v("next-deadline"))})'
+                  notes = multi(v('notes'))
+                  if v('funding'):
+                      notes = (notes + '  \n  ' if notes else '') + f'Sueldo o financiamiento: {one(v("funding"))}'
+                  entry = [f'### {name}',
+                           f'- **País / ciudad:** {one(v("location"))}',
+                           f'- **Sector:** {one(v("topics"))}',
+                           f'- **Nivel:** {kind_of}',
+                           '- **Cómo contratan:** ?',
+                           f'- **Cierre habitual:** {deadline}',
+                           '- **Qué pidieron:** ?',
+                           '- **Proceso de selección:** ?',
+                           f'- **Link:** {one(v("link"))}']
+                  if notes:
+                      entry.append(f'- **Notas:** {notes}')
+              else:
+                  entry = [f'### {name}',
+                           f'- **País / ciudad:** {one(v("location"))}',
+                           f'- **Tipo:** {kind_of}',
+                           f'- **Temas:** {one(v("topics"))}',
+                           f'- **Cierre habitual:** {one(v("typical-deadline"))}',
+                           f'- **Próximo cierre conocido:** {one(v("next-deadline"))}',
+                           '- **Inicio:** ?',
+                           f'- **Financiamiento:** {one(v("funding"))}',
+                           '- **Requisitos:** ?',
+                           f'- **Link:** {one(v("link"))}']
+                  if v('notes'):
+                      entry.append(f'- **Notas:** {multi(v("notes"))}')
+              entry.append(f'- **Agregado por / última revisión:** {who}, {fecha}')
+              append_entry(path, '\n'.join(entry))
+              title_for_commit = name
+              published('lugar', path, 'Lugar agregado en')
+
+          # ---------- 3c. Personas ----------
+          elif 'persona' in form_name:
+              name = one(v('name'), '')
+              area = one(v('section'), '')
+              folder = area_folder(area)
+              if not name:
+                  fail('falta el **nombre de la persona**.')
+              if not folder:
+                  fail(no_folder_problem(area))
+              path = folder / 'personas.md'
+              contacted = author_field or f'@{login}, {year_now}'
+              feedback = multi(v('feedback'))
+
+              match = next((i for i, h in headings(path) if person_key(h) == person_key(name)), None)
+              title_for_commit = name
+              if match is not None:
+                  # La persona ya está: sumar el contacto y el comentario a su entrada.
+                  lines = path.read_text(encoding='utf-8').split('\n')
+                  end = next((j for j in range(match + 1, len(lines))
+                              if lines[j].startswith('### ') or lines[j].startswith('## ')), len(lines))
+                  block = lines[match:end]
+                  for j, l in enumerate(block):
+                      if l.startswith('- **Contactado/a por / año:**'):
+                          block[j] = l.rstrip() + f'; {contacted}'
+                  if feedback:
+                      k = next((j for j, l in enumerate(block) if l.startswith('- **Comentarios positivos:**')), None)
+                      if k is None:
+                          last = max((j for j, l in enumerate(block) if l.strip()), default=0)
+                          block.insert(last + 1, f'- **Comentarios positivos:** {feedback}')
+                      else:
+                          old = block[k].split(':**', 1)[1].strip()
+                          n = k + 1
+                          while n < len(block) and block[n].startswith('  '):
+                              n += 1
+                          subs = block[k + 1:n]
+                          if old or subs:
+                              # Ya había comentarios: pasan a ser una lista y se suma el nuevo.
+                              new = ['- **Comentarios positivos:**']
+                              if old:
+                                  new.append(f'  - {old}')
+                              new += subs
+                              new.append(f'  - {feedback} ({contacted})'.replace('\n  ', '\n    '))
+                          else:
+                              new = [f'- **Comentarios positivos:** {feedback}']
+                          block[k:n] = new
+                  lines[match:end] = block
+                  path.write_text('\n'.join(lines), encoding='utf-8')
+                  published('persona', path, 'La persona ya estaba: sumé tu contacto y tu comentario a su entrada en')
+
+              if folder.name == 'industria':
+                  entry = [f'### {name}',
+                           f'- **Perfil público:** {one(v("website"))}',
+                           f'- **Trayectoria:** {one(v("topics"))}',
+                           f'- **Puede ayudar con:** {one(v("positions"))}',
+                           f'- **Cómo hacer el contacto:** {multi(v("contact")) or "?"}']
+              else:
+                  entry = [f'### {name}',
+                           f'- **Grupo / sitio web:** {one(v("website"))}',
+                           f'- **Temas de investigación:** {one(v("topics"))}',
+                           f'- **Posiciones que ofrece:** {one(v("positions"))}',
+                           f'- **Recibe estudiantes de Argentina:** {one(v("argentina"), "no se sabe").lower()}',
+                           f'- **Cómo hacer el contacto:** {multi(v("contact")) or "?"}']
+              entry += [f'- **Contactado/a por / año:** {contacted}',
+                        f'- **Comentarios positivos:** {feedback}'.rstrip()]
+              append_entry(path, '\n'.join(entry))
+              published('persona', path, 'Persona agregada en')
+
+          # ---------- 3d. Ciudades ----------
+          elif 'ciudad' in form_name:
+              place = one(v('city'), '')
+              if ',' not in place:
+                  fail('escribí la **ciudad y el país** separados por una coma, por ejemplo: *Heidelberg, Alemania*.')
+              city, country = [p.strip() for p in place.rsplit(',', 1)]
+              if not slugify(city) or not slugify(country):
+                  fail('escribí la **ciudad y el país** separados por una coma, por ejemplo: *Heidelberg, Alemania*.')
+              path = Path('ciudades') / f'{slugify(country)}-{slugify(city)}.md'
+              title_for_commit = f'{city}, {country}'
+
+              # Costos: las líneas "- Gasto: monto" del formulario
+              cost_rows, cost_extra = [], []
+              for l in v('costs').split('\n'):
+                  m = re.match(r'\s*[-*]\s*([^:]+):\s*(.*)$', l)
+                  if m:
+                      cost_rows.append((m.group(1).strip(), m.group(2).strip()))
+                  elif l.strip():
+                      cost_extra.append(l.strip())
+              has_costs = any(amount for _, amount in cost_rows) or cost_extra
+              when = one(v('when'), '')
+              exp_title = f'### {who}' + (f' — {when}' if when else '')
+
+              if path.exists():
+                  # La ciudad ya está: sumar todo como una experiencia nueva.
+                  part = [exp_title, '']
+                  if v('experience'):
+                      part += [keep_line_breaks(v('experience')), '']
+                  if has_costs:
+                      part.append(f'**Costo de vida mensual** ({fecha}' + (f', {one(v("currency"))}' if v('currency') else '') + '):')
+                      part += [f'- {label}: {amount}' for label, amount in cost_rows if amount]
+                      part += [f'- {l}' for l in cost_extra]
+                      part.append('')
+                  for label, key in [('Sueldos y becas', 'salaries'), ('Vivienda', 'housing'),
+                                     ('Trámites al llegar', 'paperwork'), ('Idioma', 'language'),
+                                     ('Vivir ahí', 'life'), ('Fuentes', 'sources')]:
+                      if v(key):
+                          part += [f'**{label}:** {multi(v(key))}', '']
+                  lines = path.read_text(encoding='utf-8').rstrip('\n').split('\n')
+                  if '## Experiencias' not in lines:
+                      at = lines.index('## Fuentes') if '## Fuentes' in lines else len(lines)
+                      lines[at:at] = ['## Experiencias', '']
+                  # La experiencia nueva va al final de "Experiencias", antes de "Fuentes".
+                  at = lines.index('## Fuentes') if '## Fuentes' in lines else len(lines)
+                  while at > 0 and not lines[at - 1].strip():
+                      at -= 1
+                  while part and not part[-1].strip():
+                      part.pop()
+                  after = [''] if at < len(lines) and lines[at].strip() else []
+                  lines[at:at] = [''] + part + after
+                  path.write_text('\n'.join(lines).rstrip('\n') + '\n', encoding='utf-8')
+                  published('ciudad', path, 'La ciudad ya tenía archivo: sumé tu aporte en *Experiencias* de')
+
+              md = [f'# {city}, {country}', '',
+                    f'- **Moneda:** {one(v("currency"))}',
+                    f'- **Última revisión de los montos:** ' + (f'{fecha}, por {who}' if has_costs else '?'),
+                    '- **Idioma local:** ?',
+                    '- **Habitantes (aprox.):** ?']
+              if has_costs:
+                  md += ['', '## Costo de vida mensual', '',
+                         '| Gasto | Monto | Notas |', '|---|---|---|']
+                  md += [f'| {label} | {amount.replace("|", "/")} | |' for label, amount in cost_rows]
+                  md.append('| **Total aproximado** | | |')
+                  if cost_extra:
+                      md += [''] + [f'- {l}' for l in cost_extra]
+              for title, key in [('Sueldos y becas de referencia', 'salaries'), ('Vivienda', 'housing'),
+                                 ('Trámites al llegar', 'paperwork'), ('Idioma', 'language'),
+                                 ('Vivir ahí', 'life')]:
+                  if v(key):
+                      md += ['', f'## {title}', '', keep_line_breaks(v(key))]
+              md += ['', '## Experiencias']
+              if v('experience'):
+                  md += ['', exp_title, '', keep_line_breaks(v('experience'))]
+              md += ['', '## Fuentes', '']
+              md += [as_list(v('sources'))] if v('sources') else ['-']
+              md += ['', f'<!-- Creado desde el issue #{number} -->', '']
+              path.parent.mkdir(parents=True, exist_ok=True)
+              path.write_text('\n'.join(md), encoding='utf-8')
+              published('ciudad', path, 'Ciudad publicada en')
+
+          # ---------- 3e. Sugerencias y otros ----------
+          else:
+              finish(False,
+                  'Las sugerencias no se publican solas: hacé el cambio que corresponda '
+                  '(o decidí no hacerlo) y después cerrá el issue.')
           PY
 
-      - name: Guardar el archivo, comentar y cerrar el issue
+      - name: Guardar el cambio, comentar y cerrar el issue
         if: steps.preparar.outputs.ok == 'true'
         run: |
           git config user.name "github-actions[bot]"
@@ -202,7 +466,7 @@ jobs:
           OK: ${{ steps.preparar.outputs.ok }}
         run: |
           if [ "$OK" != "false" ]; then
-            printf '%s\n' 'No pude guardar la historia en el repositorio. Volvé a poner la etiqueta `publicar` en unos minutos. Si vuelve a fallar, mirá el detalle en la pestaña **Actions**.' > "$RUNNER_TEMP/comentario.md"
+            printf '%s\n' 'No pude guardar el cambio en el repositorio. Volvé a poner la etiqueta `publicar` en unos minutos. Si vuelve a fallar, mirá el detalle en la pestaña **Actions**.' > "$RUNNER_TEMP/comentario.md"
           fi
           gh issue comment "$NUMERO" --repo "$GITHUB_REPOSITORY" --body-file "$RUNNER_TEMP/comentario.md"
           # Saca la etiqueta para que se pueda volver a poner después de corregir el issue.
