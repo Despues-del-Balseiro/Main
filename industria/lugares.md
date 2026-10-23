@@ -9,7 +9,7 @@ Empresas y puestos abiertos a egresados de física.
 3. Completala usando la entrada de EJEMPLO como guía. Escribí `?` si no sabés algo.
 4. Si la empresa ya está en la lista, agregá el puesto nuevo en esa entrada o actualizala.
 
-¿Preferís un formulario? Andá a **Issues → New issue → Agregar un lugar**.
+¿Preferís un formulario? Andá a **Issues → New issue → Agregar una empresa o puesto**.
 
 <details>
 <summary><b>Plantilla</b>: hacé clic para abrirla y después usá el botón de copiar</summary>

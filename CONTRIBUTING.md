@@ -10,7 +10,8 @@ Andá a **Issues → New issue** y elegí un formulario:
 
 | Formulario | Sirve para |
 |---|---|
-| Agregar un lugar | sumar una universidad, un instituto, un programa o una empresa |
+| Agregar un lugar | sumar una universidad, un instituto o un programa de maestría o doctorado |
+| Agregar una empresa o puesto | sumar una empresa o un puesto fuera de la academia |
 | Agregar una persona | sumar un investigador o un contacto en la industria |
 | Contar tu historia | contar cómo te fue en tu búsqueda |
 | Agregar una ciudad | contar cuánto cuesta vivir en una ciudad y cómo es el día a día |

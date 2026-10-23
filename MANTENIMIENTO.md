@@ -29,11 +29,12 @@ Notas para quienes cuidan el repositorio. Conviene que haya al menos dos persona
   |---|---|
   | Contar tu historia | Crea `AAAA-nombre-apellido.md` en la carpeta `historias/` del área |
   | Agregar un lugar | Agrega una entrada al final de `lugares.md` del área. Si ya hay una entrada con el mismo nombre, no la toca y avisa: actualizala a mano |
+  | Agregar una empresa o puesto | Agrega una entrada al final de `industria/lugares.md`, con el mismo aviso si ya existe |
   | Agregar una persona | Agrega una entrada al final de `personas.md` del área. Si la persona ya está, suma el contacto y el comentario a su entrada |
   | Agregar una ciudad | Crea `ciudades/pais-ciudad.md`. Si la ciudad ya tiene archivo, suma el aporte en *Experiencias*: si los montos cambiaron, actualizá la tabla a mano |
   | Sugerir un cambio | Nada: las sugerencias se resuelven a mano |
 
-  Lo que el formulario no pregunta queda con `?` en la entrada, para que alguien lo complete después. Si falta algo indispensable (por ejemplo, el área no tiene carpeta), la acción lo explica en un comentario y saca la etiqueta: corregí el issue y volvé a ponerla. Los lugares de la sección *General* se pasan a mano a `general/instituciones.md` o `general/financiamiento.md`.
+  Los formularios preguntan todo lo que lleva cada entrada; lo que la persona deja vacío queda con `?`, para que alguien lo complete después. Si falta algo indispensable (por ejemplo, el área no tiene carpeta), la acción lo explica en un comentario y saca la etiqueta: corregí el issue y volvé a ponerla. Si alguien eligió *Otra área*, creala primero con **Actions → Agregar área**, usando el nombre que escribió, y después poné la etiqueta. Los lugares de la sección *General* se pasan a mano a `general/instituciones.md` o `general/financiamiento.md`.
 - **Revisá los pull requests**, sobre todo la regla sobre personas: los comentarios tienen que ser positivos o estar en blanco. Si no lo son, pedile a quien los escribió que los saque antes de aceptar el cambio. Lo mismo con las historias que mencionan a personas.
 - **Áreas nuevas.** Usá **Actions → Agregar área → Run workflow** (los pasos están en *Agregar un área nueva*, en [CONTRIBUTING.md](CONTRIBUTING.md)). Crea la carpeta y actualiza la tabla de [academia/README.md](academia/README.md), los formularios y [general/encuesta.md](general/encuesta.md). Después sumá el área a mano en la pregunta *Área* del formulario de Google.
   - Si la acción falla al guardar los cambios con un error de permisos (403), andá a **Settings → Actions → General → Workflow permissions**, elegí **Read and write permissions** y volvé a correrla.

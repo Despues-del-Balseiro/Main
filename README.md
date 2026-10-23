@@ -36,7 +36,7 @@ Cada archivo tiene una entrada de **EJEMPLO** que muestra cómo completarlo. Los
 
 No hace falta saber Git. De menor a mayor esfuerzo:
 
-- **Completá un formulario.** Andá a **Issues → New issue** y elegí *Agregar un lugar*, *Agregar una persona*, *Contar tu historia*, *Agregar una ciudad* o *Sugerir un cambio*. Alguien del equipo de mantenimiento lo pasa al archivo que corresponde.
+- **Completá un formulario.** Andá a **Issues → New issue** y elegí *Agregar un lugar*, *Agregar una empresa o puesto*, *Agregar una persona*, *Contar tu historia*, *Agregar una ciudad* o *Sugerir un cambio*. Alguien del equipo de mantenimiento lo pasa al archivo que corresponde.
 - **Editá desde el navegador.** Abrí cualquier archivo y hacé clic en el ícono del lápiz.
 - **Usá Git**, si ya lo usás.
 
