@@ -25,11 +25,26 @@ body:
     attributes:
       label: Moneda
       placeholder: "p. ej. euro (€)"
+  - type: input
+    id: local-language
+    attributes:
+      label: Idioma local
+      placeholder: "p. ej. alemán"
+  - type: input
+    id: population
+    attributes:
+      label: Habitantes (aprox.)
+      placeholder: "p. ej. 160.000"
+  - type: textarea
+    id: summary
+    attributes:
+      label: En pocas palabras
+      description: Dos o tres oraciones sobre cómo es la ciudad y para quién es una buena opción.
   - type: textarea
     id: costs
     attributes:
       label: Costo de vida mensual
-      description: Completá lo que sepas. Si varía mucho, poné un rango.
+      description: "Completá lo que sepas. Si varía mucho, poné un rango. Si querés agregar una nota, ponela entre paréntesis: 550 € (con gastos incluidos)."
       value: |
         - Habitación en departamento compartido:
         - Monoambiente:
@@ -38,6 +53,7 @@ body:
         - Seguro de salud:
         - Teléfono e internet:
         - Otros (salidas, deporte, ...):
+        - Total aproximado:
   - type: textarea
     id: salaries
     attributes:
@@ -63,6 +79,11 @@ body:
     attributes:
       label: Vivir ahí
       description: Clima, transporte, comunidad argentina o latina, seguridad, lo que quieras contar.
+  - type: textarea
+    id: institutions
+    attributes:
+      label: Instituciones en la ciudad
+      description: Universidades, institutos o empresas, una por línea. Si ya están en algún lugares.md, poné el link.
   - type: textarea
     id: experience
     attributes:

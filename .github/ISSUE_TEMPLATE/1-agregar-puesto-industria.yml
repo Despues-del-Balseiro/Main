@@ -1,0 +1,68 @@
+name: Agregar una empresa o puesto
+description: Sumá una empresa o un puesto fuera de la academia (ciencia de datos, finanzas, energía, software, ...). Alguien del equipo lo revisa y lo publica.
+title: "[Empresa] "
+labels: ["nuevo-lugar"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Completá lo que sepas y dejá el resto vacío. Para universidades, institutos y programas de posgrado, usá el formulario **Agregar un lugar**.
+  - type: input
+    id: name
+    attributes:
+      label: Empresa y puesto
+      placeholder: "p. ej. Ejemplo Analytics — Data Scientist Junior"
+    validations:
+      required: true
+  - type: input
+    id: location
+    attributes:
+      label: País y ciudad
+      description: Aclará si se puede trabajar en forma remota desde Argentina.
+  - type: input
+    id: sector
+    attributes:
+      label: Sector
+      placeholder: "p. ej. ciencia de datos / finanzas / energía / software / consultoría"
+  - type: dropdown
+    id: level
+    attributes:
+      label: Nivel
+      options:
+        - Pasantía
+        - Junior
+        - Programa para graduados
+        - Otro
+  - type: input
+    id: how-hire
+    attributes:
+      label: Cómo contratan
+      placeholder: "p. ej. todo el año / un programa anual con fecha límite"
+  - type: input
+    id: typical-deadline
+    attributes:
+      label: Cierre habitual
+      placeholder: "p. ej. no hay; los avisos quedan abiertos 2–4 semanas"
+  - type: textarea
+    id: asked
+    attributes:
+      label: Qué pidieron
+      description: Habilidades, pruebas, idiomas.
+  - type: textarea
+    id: process
+    attributes:
+      label: Proceso de selección
+      description: Las etapas y cuánto duró en total.
+  - type: input
+    id: link
+    attributes:
+      label: Link a la página de empleos o al aviso
+  - type: textarea
+    id: notes
+    attributes:
+      label: Notas
+      description: Sueldo, consejos, lo que quieras agregar.
+  - type: input
+    id: author
+    attributes:
+      label: Tu nombre o usuario de GitHub (opcional)

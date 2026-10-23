@@ -1,5 +1,5 @@
 name: Agregar un lugar
-description: Sumá una universidad, un instituto, un programa o una empresa. Alguien del equipo lo pasa al archivo que corresponde.
+description: Sumá una universidad, un instituto o un programa de maestría o doctorado. Alguien del equipo lo revisa y lo publica.
 title: "[Lugar] "
 labels: ["nuevo-lugar"]
 body:
@@ -7,6 +7,7 @@ body:
     attributes:
       value: |
         Completá lo que sepas y dejá el resto vacío. Las fechas exactas cambian cada año, así que el cierre *habitual* suele ser lo más útil.
+        Para empresas y trabajos fuera de la academia, usá el formulario **Agregar una empresa o puesto**.
   - type: dropdown
     id: section
     attributes:
@@ -20,15 +21,18 @@ body:
         - Materia condensada
         - Partículas
         - "Semiconductores"
-        - Industria
         - General (todas las áreas)
         - Otra área (escribila abajo)
     validations:
       required: true
   - type: input
+    id: other-area
+    attributes:
+      label: Si elegiste "Otra área", ¿cuál?
+  - type: input
     id: name
     attributes:
-      label: Institución o empresa, y programa o puesto
+      label: Institución y programa o grupo
       placeholder: "p. ej. Universidad de Ejemplópolis — Escuela de Posgrado en Materiales Cuánticos"
     validations:
       required: true
@@ -36,7 +40,6 @@ body:
     id: location
     attributes:
       label: País y ciudad
-      description: Para trabajos, aclará si se puede trabajar en forma remota desde Argentina.
   - type: dropdown
     id: type
     attributes:
@@ -47,13 +50,12 @@ body:
         - Maestría
         - Posdoc
         - Pasantía
-        - Trabajo
         - Escuela de verano
         - Otro
   - type: input
     id: topics
     attributes:
-      label: Temas o sector
+      label: Temas
   - type: input
     id: typical-deadline
     attributes:
@@ -65,10 +67,20 @@ body:
       label: Próximo cierre conocido
       placeholder: "p. ej. 1 de diciembre de 2026"
   - type: input
+    id: start
+    attributes:
+      label: Inicio
+      placeholder: "p. ej. octubre del año siguiente / flexible"
+  - type: input
     id: funding
     attributes:
       label: Financiamiento
       placeholder: "p. ej. contrato de 4 años con sueldo / necesitás una beca propia"
+  - type: textarea
+    id: requirements
+    attributes:
+      label: Requisitos
+      description: Certificados de idioma, cartas de recomendación, GRE, ...
   - type: input
     id: link
     attributes:
@@ -77,7 +89,7 @@ body:
     id: notes
     attributes:
       label: Notas
-      description: Requisitos, cómo es la selección, consejos. Para trabajos, describí el proceso de selección y cuánto duró.
+      description: Consejos, cómo es la selección, lo que quieras agregar.
   - type: input
     id: author
     attributes:

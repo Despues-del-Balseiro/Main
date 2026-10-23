@@ -27,6 +27,10 @@ body:
     validations:
       required: true
   - type: input
+    id: other-area
+    attributes:
+      label: Si elegiste "Otra área", ¿cuál?
+  - type: input
     id: name
     attributes:
       label: Nombre e institución o empresa

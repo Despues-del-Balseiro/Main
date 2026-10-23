@@ -94,7 +94,8 @@ jobs:
           lines.insert(at, new_row)
           readme.write_text('\n'.join(lines) + '\n', encoding='utf-8')
 
-          # 3. Listas desplegables de los formularios (las opciones que van antes de "Industria")
+          # 3. Listas desplegables de los formularios: las áreas son las opciones que van
+          #    antes de "Industria" o, si el formulario no la tiene, antes de "General (todas las áreas)"
           def option_key(line):
               return slugify(line.strip()[2:].strip('"'))
 
@@ -102,7 +103,7 @@ jobs:
           for form in sorted(Path('.github/ISSUE_TEMPLATE').glob('*.yml')):
               lines = form.read_text(encoding='utf-8').splitlines()
               for i, l in enumerate(lines):
-                  if l.strip() == '- Industria':
+                  if l.strip() in ('- Industria', '- General (todas las áreas)'):
                       indent = l[:len(l) - len(l.lstrip())]
                       j = i
                       while j > 0 and lines[j - 1].startswith(indent + '- '):

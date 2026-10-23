@@ -3,6 +3,7 @@
 # Reconoce el formulario por las preguntas del issue:
 #   Contar tu historia  → crea historias/AAAA-nombre-apellido.md en la carpeta del área
 #   Agregar un lugar    → agrega una entrada al final de lugares.md del área
+#   Agregar una empresa o puesto → agrega una entrada al final de industria/lugares.md
 #   Agregar una persona → agrega una entrada en personas.md (o suma el contacto si la persona ya está)
 #   Agregar una ciudad  → crea ciudades/pais-ciudad.md (o suma una experiencia si la ciudad ya está)
 # Después deja un comentario con el link y cierra el issue. Si algo falta, lo explica y saca la etiqueta.
@@ -122,6 +123,19 @@ jobs:
               return (f'no hay una carpeta para la sección **{area or "(vacía)"}**. '
                       'Elegí un área de la lista o, si es nueva, creala primero con **Actions → Agregar área**.' + extra)
 
+          def chosen_area():
+              """El área elegida; si es "Otra área", la que escribieron en la pregunta siguiente."""
+              area = one(v('section'), '')
+              if slugify(area).startswith('otra') and v('other-area'):
+                  area = one(v('other-area'), '')
+              return area
+
+          def check_duplicate(path, name):
+              for _, existing in headings(path):
+                  if slugify(existing) == slugify(name):
+                      fail(f'ya hay una entrada **{existing}** en `{path.as_posix()}`. '
+                           'Actualizala a mano con los datos de este issue y después cerralo.')
+
           def append_entry(path, text):
               content = path.read_text(encoding='utf-8').rstrip('\n')
               path.write_text(content + '\n\n' + text.strip('\n') + '\n', encoding='utf-8')
@@ -157,6 +171,11 @@ jobs:
 
           forms = {p.name: read_form(p) for p in sorted(Path('.github/ISSUE_TEMPLATE').glob('*.yml'))
                    if p.name != 'config.yml'}
+          # Preguntas que cambiaron de texto: así los issues viejos se siguen pudiendo publicar.
+          ALIASES = {'3-contar-historia.yml': {'Año en que te recibiste': 'year'}}
+          for form_file, extra in ALIASES.items():
+              for label, field_id in extra.items():
+                  forms.get(form_file, {}).setdefault(label, field_id)
           body_headings = {l[4:].strip() for l in body.split('\n') if l.startswith('### ')}
           form_name = max(forms, key=lambda f: len(body_headings & set(forms[f])))
           if len(body_headings & set(forms[form_name])) < 2:
@@ -186,14 +205,14 @@ jobs:
           # ---------- 3a. Historias ----------
           if 'historia' in form_name:
               name = one(v('name'), '')
-              area = one(v('section'), '')
+              area = chosen_area()
               year_match = re.search(r'\b(19|20)\d{2}\b', v('year'))
               base_folder = area_folder(area)
               problems = []
               if not name:
                   problems.append('falta el **nombre para mostrar**.')
               if not year_match:
-                  problems.append('el **año en que te recibiste** tiene que tener 4 cifras (por ejemplo, 2026).')
+                  problems.append('en **¿Cuándo te recibiste?** tiene que estar el año con 4 cifras (por ejemplo, *diciembre 2026*).')
               if not base_folder:
                   problems.append(no_folder_problem(area))
               if problems:
@@ -204,7 +223,7 @@ jobs:
               md = [f'# {year} — {name}', '', f'- **Área:** {area}']
               if v('thesis'):
                   md.append(f'- **Tema de tesis:** {one(v("thesis"))}')
-              md.append(f'- **Me recibí:** {year}')
+              md.append(f'- **Me recibí:** {one(v("year"))}')
               if v('looked-for'):
                   md.append(f'- **Busqué:** {one(v("looked-for")).lower()}')
               for title, key, fmt in [
@@ -230,13 +249,39 @@ jobs:
               title_for_commit = name
               published('historia', path, 'Historia publicada en')
 
-          # ---------- 3b. Lugares ----------
+          # ---------- 3b. Empresas y puestos (industria) ----------
+          elif 'puesto' in form_name:
+              name = one(v('name'), '')
+              if not name:
+                  fail('falta el **nombre de la empresa y el puesto**.')
+              path = Path('industria/lugares.md')
+              check_duplicate(path, name)
+              entry = [f'### {name}',
+                       f'- **País / ciudad:** {one(v("location"))}',
+                       f'- **Sector:** {one(v("sector"))}',
+                       f'- **Nivel:** {one(v("level")).lower()}',
+                       f'- **Cómo contratan:** {one(v("how-hire"))}',
+                       f'- **Cierre habitual:** {one(v("typical-deadline"))}',
+                       f'- **Qué pidieron:** {multi(v("asked")) or "?"}',
+                       f'- **Proceso de selección:** {multi(v("process")) or "?"}',
+                       f'- **Link:** {one(v("link"))}']
+              if v('notes'):
+                  entry.append(f'- **Notas:** {multi(v("notes"))}')
+              entry.append(f'- **Agregado por / última revisión:** {who}, {fecha}')
+              append_entry(path, '\n'.join(entry))
+              title_for_commit = name
+              published('puesto', path, 'Puesto agregado en')
+
+          # ---------- 3c. Lugares (academia) ----------
           elif 'lugar' in form_name:
               name = one(v('name'), '')
-              area = one(v('section'), '')
+              area = chosen_area()
               folder = area_folder(area)
               if not name:
-                  fail('falta el **nombre de la institución o empresa**.')
+                  fail('falta el **nombre de la institución**.')
+              if folder and folder.name == 'industria':
+                  fail('para la industria está el formulario *Agregar una empresa o puesto*. '
+                       'Este issue pasalo a mano a `industria/lugares.md`.')
               if not folder:
                   extra = ''
                   if slugify(area).startswith('general'):
@@ -244,52 +289,28 @@ jobs:
                                'pasala a mano a `general/instituciones.md` o `general/financiamiento.md`.')
                   fail(no_folder_problem(area, extra))
               path = folder / 'lugares.md'
-              for _, existing in headings(path):
-                  if slugify(existing) == slugify(name):
-                      fail(f'ya hay una entrada **{existing}** en `{path.as_posix()}`. '
-                           'Actualizala a mano con los datos de este issue y después cerralo.')
-
-              kind_of = one(v('type')).lower()
-              if folder.name == 'industria':
-                  deadline = one(v('typical-deadline'))
-                  if v('next-deadline'):
-                      deadline += f' (próximo: {one(v("next-deadline"))})'
-                  notes = multi(v('notes'))
-                  if v('funding'):
-                      notes = (notes + '  \n  ' if notes else '') + f'Sueldo o financiamiento: {one(v("funding"))}'
-                  entry = [f'### {name}',
-                           f'- **País / ciudad:** {one(v("location"))}',
-                           f'- **Sector:** {one(v("topics"))}',
-                           f'- **Nivel:** {kind_of}',
-                           '- **Cómo contratan:** ?',
-                           f'- **Cierre habitual:** {deadline}',
-                           '- **Qué pidieron:** ?',
-                           '- **Proceso de selección:** ?',
-                           f'- **Link:** {one(v("link"))}']
-                  if notes:
-                      entry.append(f'- **Notas:** {notes}')
-              else:
-                  entry = [f'### {name}',
-                           f'- **País / ciudad:** {one(v("location"))}',
-                           f'- **Tipo:** {kind_of}',
-                           f'- **Temas:** {one(v("topics"))}',
-                           f'- **Cierre habitual:** {one(v("typical-deadline"))}',
-                           f'- **Próximo cierre conocido:** {one(v("next-deadline"))}',
-                           '- **Inicio:** ?',
-                           f'- **Financiamiento:** {one(v("funding"))}',
-                           '- **Requisitos:** ?',
-                           f'- **Link:** {one(v("link"))}']
-                  if v('notes'):
-                      entry.append(f'- **Notas:** {multi(v("notes"))}')
+              check_duplicate(path, name)
+              entry = [f'### {name}',
+                       f'- **País / ciudad:** {one(v("location"))}',
+                       f'- **Tipo:** {one(v("type")).lower()}',
+                       f'- **Temas:** {one(v("topics"))}',
+                       f'- **Cierre habitual:** {one(v("typical-deadline"))}',
+                       f'- **Próximo cierre conocido:** {one(v("next-deadline"))}',
+                       f'- **Inicio:** {one(v("start"))}',
+                       f'- **Financiamiento:** {one(v("funding"))}',
+                       f'- **Requisitos:** {multi(v("requirements")) or "?"}',
+                       f'- **Link:** {one(v("link"))}']
+              if v('notes'):
+                  entry.append(f'- **Notas:** {multi(v("notes"))}')
               entry.append(f'- **Agregado por / última revisión:** {who}, {fecha}')
               append_entry(path, '\n'.join(entry))
               title_for_commit = name
               published('lugar', path, 'Lugar agregado en')
 
-          # ---------- 3c. Personas ----------
+          # ---------- 3d. Personas ----------
           elif 'persona' in form_name:
               name = one(v('name'), '')
-              area = one(v('section'), '')
+              area = chosen_area()
               folder = area_folder(area)
               if not name:
                   fail('falta el **nombre de la persona**.')
@@ -364,31 +385,48 @@ jobs:
               path = Path('ciudades') / f'{slugify(country)}-{slugify(city)}.md'
               title_for_commit = f'{city}, {country}'
 
-              # Costos: las líneas "- Gasto: monto" del formulario
-              cost_rows, cost_extra = [], []
+              # Costos: las líneas "- Gasto: monto (nota)" del formulario
+              cost_rows, cost_extra, total = [], [], ('', '')
               for l in v('costs').split('\n'):
                   m = re.match(r'\s*[-*]\s*([^:]+):\s*(.*)$', l)
-                  if m:
-                      cost_rows.append((m.group(1).strip(), m.group(2).strip()))
-                  elif l.strip():
-                      cost_extra.append(l.strip())
-              has_costs = any(amount for _, amount in cost_rows) or cost_extra
+                  if not m:
+                      if l.strip():
+                          cost_extra.append(l.strip())
+                      continue
+                  label, amount = m.group(1).strip(), m.group(2).strip()
+                  note = ''
+                  n = re.match(r'^(.*?)\s*\(([^()]*)\)\s*$', amount)
+                  if n:
+                      amount, note = n.group(1).strip(), n.group(2).strip()
+                  if slugify(label).startswith('total'):
+                      total = (amount, note)
+                  else:
+                      cost_rows.append((label, amount, note))
+              has_costs = any(r[1] for r in cost_rows) or total[0] or cost_extra
               when = one(v('when'), '')
               exp_title = f'### {who}' + (f' — {when}' if when else '')
+              cell = lambda text: text.replace('|', '/')
 
               if path.exists():
                   # La ciudad ya está: sumar todo como una experiencia nueva.
                   part = [exp_title, '']
                   if v('experience'):
                       part += [keep_line_breaks(v('experience')), '']
+                  if v('summary'):
+                      part += [f'**En pocas palabras:** {multi(v("summary"))}', '']
                   if has_costs:
                       part.append(f'**Costo de vida mensual** ({fecha}' + (f', {one(v("currency"))}' if v('currency') else '') + '):')
-                      part += [f'- {label}: {amount}' for label, amount in cost_rows if amount]
+                      part += [f'- {label}: {amount}' + (f' ({note})' if note else '')
+                               for label, amount, note in cost_rows if amount]
+                      if total[0]:
+                          part.append(f'- **Total aproximado:** {total[0]}' + (f' ({total[1]})' if total[1] else ''))
                       part += [f'- {l}' for l in cost_extra]
                       part.append('')
                   for label, key in [('Sueldos y becas', 'salaries'), ('Vivienda', 'housing'),
                                      ('Trámites al llegar', 'paperwork'), ('Idioma', 'language'),
-                                     ('Vivir ahí', 'life'), ('Fuentes', 'sources')]:
+                                     ('Vivir ahí', 'life'), ('Instituciones', 'institutions'),
+                                     ('Idioma local', 'local-language'), ('Habitantes', 'population'),
+                                     ('Fuentes', 'sources')]:
                       if v(key):
                           part += [f'**{label}:** {multi(v(key))}', '']
                   lines = path.read_text(encoding='utf-8').rstrip('\n').split('\n')
@@ -409,20 +447,25 @@ jobs:
               md = [f'# {city}, {country}', '',
                     f'- **Moneda:** {one(v("currency"))}',
                     f'- **Última revisión de los montos:** ' + (f'{fecha}, por {who}' if has_costs else '?'),
-                    '- **Idioma local:** ?',
-                    '- **Habitantes (aprox.):** ?']
+                    f'- **Idioma local:** {one(v("local-language"))}',
+                    f'- **Habitantes (aprox.):** {one(v("population"))}']
+              if v('summary'):
+                  md += ['', '## En pocas palabras', '', keep_line_breaks(v('summary'))]
               if has_costs:
                   md += ['', '## Costo de vida mensual', '',
                          '| Gasto | Monto | Notas |', '|---|---|---|']
-                  md += [f'| {label} | {amount.replace("|", "/")} | |' for label, amount in cost_rows]
-                  md.append('| **Total aproximado** | | |')
+                  md += [f'| {cell(label)} | {cell(amount)} | {cell(note)} |' for label, amount, note in cost_rows]
+                  md.append(f'| **Total aproximado** | {cell(total[0])} | {cell(total[1])} |')
                   if cost_extra:
                       md += [''] + [f'- {l}' for l in cost_extra]
-              for title, key in [('Sueldos y becas de referencia', 'salaries'), ('Vivienda', 'housing'),
-                                 ('Trámites al llegar', 'paperwork'), ('Idioma', 'language'),
-                                 ('Vivir ahí', 'life')]:
+              for title, key, fmt in [('Sueldos y becas de referencia', 'salaries', keep_line_breaks),
+                                      ('Vivienda', 'housing', keep_line_breaks),
+                                      ('Trámites al llegar', 'paperwork', keep_line_breaks),
+                                      ('Idioma', 'language', keep_line_breaks),
+                                      ('Vivir ahí', 'life', keep_line_breaks),
+                                      ('Instituciones en la ciudad', 'institutions', as_list)]:
                   if v(key):
-                      md += ['', f'## {title}', '', keep_line_breaks(v(key))]
+                      md += ['', f'## {title}', '', fmt(v(key))]
               md += ['', '## Experiencias']
               if v('experience'):
                   md += ['', exp_title, '', keep_line_breaks(v('experience'))]
