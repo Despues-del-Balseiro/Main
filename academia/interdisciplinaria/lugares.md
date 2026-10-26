@@ -47,3 +47,23 @@ Universidades, institutos y programas con maestrías o doctorados en física int
 - **Link:** https://example.org/complex-systems-phd
 - **Notas:** los preseleccionados participan de un simposio online de dos días con entrevistas. La experiencia en programación y análisis de datos pesó tanto como la formación en física.
 - **Agregado por / última revisión:** @usuario-ejemplo, octubre 2026
+
+### International Max Planck Research School- Quantitative Behaviour, Ecology and Evolution
+- **País / ciudad:** Alemania, Konstanz (Constanza)
+- **Tipo:** doctorado
+- **Temas:** Modelado de comportamiento animal, más análisis de datos adquiridos de individuos en su hábitat natural
+- **Cierre habitual:** dos llamados por año, octubre a noviembre y abril aproximadamente
+- **Próximo cierre conocido:** 15 de noviembre 2026
+- **Inicio:** Su verano/otoño, nuestro invierno/primaver
+- **Financiamiento:** Position is fully funded for 4 years (TVöD salary scale E-13, 65%).
+- **Requisitos:** Please include the following documents:  
+  1. Letter of motivation/research statement (2 pages) addressing the following points:  
+  - 1 page: Describe your main research interests, how they developed, and how they relate to the proposed research project  
+  - 1 page: Describe 1-2 biological questions you would like to ask or hypotheses you would like to test using the described dataset(s), and explain the analytical approach(es) you would use to address them.  
+  2. Curriculum vitae (CV)  
+  3. Contact information for 2-3 references  
+  4. Academic transcripts for your BSc and (if applicable) MSc degrees. Transcripts can be unofficial at this stage – official records will be required before acceptance.  
+  5. A sample of your scientific writing (e.g., publication or manuscript in prep, thesis, term paper, etc.)
+- **Link:** https://imprs-qbee.mpg.de/66685/current
+- **Notas:** Es un lugar de competencia internacional, por lo que escribir la carta de motivación requiere tiempo y dedicación. A priori, la gente con la que me comuniqué siempre estuvo muy predispuesta y me respondieron todas las dudas.
+- **Agregado por / última revisión:** LucianoLopezib, octubre 2026
